@@ -22,16 +22,19 @@ export const CODE_SELECTOR: string = 'code-cell-component';
 	templateUrl: decodeURI(require.toUrl('./codeCell.component.html'))
 })
 export class CodeCellComponent extends CellView implements OnInit, OnChanges {
-	private _model: NotebookModel;
-	private _activeCellId: string;
+	@ViewChild('codeCellOutput', { read: ElementRef }) private outputPreview: ElementRef;
 
 	@Input() cellModel: ICellModel;
+
 	@Input() set model(value: NotebookModel) {
 		this._model = value;
 	}
 	@Input() set activeCellId(value: string) {
 		this._activeCellId = value;
 	}
+
+	private _model: NotebookModel;
+	private _activeCellId: string;
 
 	constructor(
 		@Inject(forwardRef(() => ChangeDetectorRef)) private _changeRef: ChangeDetectorRef,
@@ -45,14 +48,14 @@ export class CodeCellComponent extends CellView implements OnInit, OnChanges {
 		this.updateTheme(this.themeService.getColorTheme());
 	}
 
-	ngOnChanges(changes: {[propKey: string]: SimpleChange}) {
+	ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
 		for (let propName in changes) {
 			if (propName === 'activeCellId') {
 				let changedProp = changes[propName];
 				this._activeCellId = changedProp.currentValue;
 				break;
 			}
-		  }
+		}
 	}
 
 
@@ -62,6 +65,8 @@ export class CodeCellComponent extends CellView implements OnInit, OnChanges {
 	}
 
 	private updateTheme(theme: IColorTheme): void {
+		let outputElement = <HTMLElement>this.outputPreview.nativeElement;
+		outputElement.style.borderTopColor = theme.getColor(themeColors.SIDE_BAR_BACKGROUND, true).toString();
 	}
 
 	get model(): NotebookModel {

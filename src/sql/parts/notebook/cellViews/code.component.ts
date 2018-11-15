@@ -33,6 +33,7 @@ import { RunCellAction, DeleteCellAction, AddCellAction } from 'sql/parts/notebo
 import { NotebookModel } from 'sql/parts/notebook/models/notebookModel';
 import { ToggleMoreWidgetAction } from 'sql/parts/dashboard/common/actions';
 import { CellTypes } from 'sql/parts/notebook/models/contracts';
+import { INotificationService } from 'vs/platform/notification/common/notification';
 
 export const CODE_SELECTOR: string = 'code-component';
 
@@ -41,9 +42,6 @@ export const CODE_SELECTOR: string = 'code-component';
 	templateUrl: decodeURI(require.toUrl('./code.component.html'))
 })
 export class CodeComponent extends AngularDisposable implements OnInit, OnChanges {
-	private _model: NotebookModel;
-	private _activeCellId: string;
-
 	@ViewChild('toolbar', { read: ElementRef }) private toolbarElement: ElementRef;
 	@ViewChild('moreactions', { read: ElementRef }) private moreactionsElement: ElementRef;
 	@ViewChild('editor', { read: ElementRef }) private codeElement: ElementRef;
@@ -56,14 +54,6 @@ export class CodeComponent extends AngularDisposable implements OnInit, OnChange
 		this._activeCellId = value;
 	}
 
-	get model(): NotebookModel {
-		return this._model;
-	}
-
-	get activeCellId(): string {
-		return this._activeCellId;
-	}
-
 	@Output() public onContentChanged = new EventEmitter<void>();
 
 	protected _actionBar: Taskbar;
@@ -74,6 +64,8 @@ export class CodeComponent extends AngularDisposable implements OnInit, OnChange
 	private _editorModel: ITextModel;
 	private _uri: string;
 	private _actions: Action[] = [];
+	private _model: NotebookModel;
+	private _activeCellId: string;
 
 	constructor(
 		@Inject(forwardRef(() => CommonServiceInterface)) private _bootstrapService: CommonServiceInterface,
@@ -83,7 +75,8 @@ export class CodeComponent extends AngularDisposable implements OnInit, OnChange
 		@Inject(IModelService) private _modelService: IModelService,
 		@Inject(IModeService) private _modeService: IModeService,
 		@Inject(IContextMenuService) private contextMenuService: IContextMenuService,
-		@Inject(IContextViewService) private contextViewService: IContextViewService
+		@Inject(IContextViewService) private contextViewService: IContextViewService,
+		@Inject(INotificationService) private notificationService: INotificationService,
 	) {
 		super();
 	}
@@ -121,6 +114,14 @@ export class CodeComponent extends AngularDisposable implements OnInit, OnChange
 		this._register(DOM.addDisposableListener(window, DOM.EventType.RESIZE, e => {
 			this.layout();
 		}));
+	}
+
+	get model(): NotebookModel {
+		return this._model;
+	}
+
+	get activeCellId(): string {
+		return this._activeCellId;
 	}
 
 	private createEditor(): void {
@@ -207,4 +208,5 @@ export class CodeComponent extends AngularDisposable implements OnInit, OnChange
 		let moreactionsEl = <HTMLElement>this.moreactionsElement.nativeElement;
 		moreactionsEl.style.borderRightColor = theme.getColor(themeColors.SIDE_BAR_BACKGROUND, true).toString();
 	}
+
 }
