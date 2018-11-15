@@ -48,6 +48,7 @@ export class NotebookComponent extends AngularDisposable implements OnInit {
 	private _errorMessage: string;
 	protected _actionBar: Taskbar;
 	private _activeCell: ICellModel;
+	private _activeCellId: string;
 	protected isLoading: boolean;
 	private notebookManager: INotebookManager;
 	private _modelReadyDeferred = new Deferred<NotebookModel>();
@@ -82,7 +83,11 @@ export class NotebookComponent extends AngularDisposable implements OnInit {
 	public get model(): NotebookModel {
 		return this._model;
 	}
-	
+
+	public get activeCellId(): string {
+		return this._activeCellId;
+	}
+
 	public get modelRegistered(): Promise<NotebookModel> {
 		return this._modelRegisteredDeferred.promise;
 	}
@@ -104,6 +109,7 @@ export class NotebookComponent extends AngularDisposable implements OnInit {
 			this._activeCell = cell;
 			this._activeCell.active = true;
 			this._model.activeCell = this._activeCell;
+			this._activeCellId = cell.id;
 			this._changeRef.detectChanges();
 		}
 	}
