@@ -82,7 +82,7 @@ export class TextCellComponent extends CellView implements OnInit, OnChanges {
 		for (let propName in changes) {
 			if (propName === 'activeCellId') {
 				let changedProp = changes[propName];
-				if (changedProp.currentValue !== undefined) {
+				if (changedProp.currentValue !== undefined && this._toggleMoreActions !== undefined) {
 					if (this.cellModel.id === changedProp.currentValue) {
 						this._toggleMoreActions.toggle(true);
 					}

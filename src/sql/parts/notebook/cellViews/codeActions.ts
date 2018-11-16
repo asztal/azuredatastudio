@@ -113,6 +113,7 @@ export class DeleteCellAction extends Action {
 export class NotebookCellToggleMoreActon {
 	private _actions: Action[] = [];
 	private _moreActions: ActionBar;
+
 	constructor (
 		private _instantiationService: IInstantiationService,
 		private contextMenuService: IContextMenuService,
@@ -132,7 +133,7 @@ export class NotebookCellToggleMoreActon {
 		this._moreActions.context = { target: moreActionsElement };
 	}
 
-	public toggle(showIcon: boolean) {
+	public toggle(showIcon: boolean): void {
 		if (showIcon) {
 			this._moreActions.push(this._instantiationService.createInstance(ToggleMoreWidgetAction, this._actions, this.model, this.contextMenuService), { icon: showIcon, label: false });
 		} else if (this._moreActions !== undefined) {
