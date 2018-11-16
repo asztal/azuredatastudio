@@ -19,7 +19,7 @@ import { NotebookModel } from 'sql/parts/notebook/models/notebookModel';
 import { Action } from 'vs/base/common/actions';
 import { ActionBar, ActionsOrientation } from 'vs/base/browser/ui/actionbar/actionbar';
 import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
-import { DeleteCellAction, AddCellAction } from 'sql/parts/notebook/cellViews/codeActions';
+import { DeleteCellAction, AddCellAction, NotebookCellToggleMoreActon } from 'sql/parts/notebook/cellViews/codeActions';
 import { CellTypes } from 'sql/parts/notebook/models/contracts';
 import { INotificationService } from 'vs/platform/notification/common/notification';
 import { ToggleMoreWidgetAction } from 'sql/parts/dashboard/common/actions';
@@ -47,8 +47,7 @@ export class TextCellComponent extends CellView implements OnInit, OnChanges {
 	private _sanitizer: ISanitizer;
 	private _model: NotebookModel;
 	private _activeCellId: string;
-	private _actions: Action[] = [];
-	private _moreActions: ActionBar;
+	private _toggleMoreActions: NotebookCellToggleMoreActon;
 
 	constructor(
 		@Inject(forwardRef(() => CommonServiceInterface)) private _bootstrapService: CommonServiceInterface,
@@ -63,16 +62,12 @@ export class TextCellComponent extends CellView implements OnInit, OnChanges {
 		this.isEditMode = false;
 	}
 	ngAfterViewInit() {
-		this._actions.push(
-			this._instantiationService.createInstance(AddCellAction, 'codeBefore', localize('codeBefore', 'Insert Code before'), CellTypes.Code, false, this.notificationService),
-			this._instantiationService.createInstance(AddCellAction, 'codeBefore', localize('codeAfter', 'Insert Code after'), CellTypes.Code, true, this.notificationService),
-			this._instantiationService.createInstance(AddCellAction, 'markdownBefore', localize('markdownBefore', 'Insert Markdown before'), CellTypes.Markdown, false, this.notificationService),
-			this._instantiationService.createInstance(AddCellAction, 'markdownAfter', localize('markdownAfter', 'Insert Markdown after'), CellTypes.Markdown, true, this.notificationService),
-			this._instantiationService.createInstance(DeleteCellAction, 'delete', localize('delete', 'Delete'), CellTypes.Code, true, this.notificationService)
-		);
-		let moreActionsElement = <HTMLElement>this.moreactionsElement.nativeElement;
-		this._moreActions = new ActionBar(moreActionsElement, { orientation: ActionsOrientation.VERTICAL });
-		this._moreActions.context = { target: moreActionsElement };
+		this._toggleMoreActions = new NotebookCellToggleMoreActon(
+			this._instantiationService,
+			this.contextMenuService,
+			this.notificationService,
+			this.moreactionsElement,
+			this.model);
 	}
 	get activeCellId(): string {
 		return this._activeCellId;
@@ -89,21 +84,13 @@ export class TextCellComponent extends CellView implements OnInit, OnChanges {
 				let changedProp = changes[propName];
 				if (changedProp.currentValue !== undefined) {
 					if (this.cellModel.id === changedProp.currentValue) {
-						this.toggleMoreActions(true);
+						this._toggleMoreActions.toggle(true);
 					}
 					else {
-						this.toggleMoreActions(false);
+						this._toggleMoreActions.toggle(false);
 					}
 				}
 			}
-		}
-	}
-
-	private toggleMoreActions(showIcon: boolean) {
-		if (showIcon) {
-			this._moreActions.push(this._instantiationService.createInstance(ToggleMoreWidgetAction, this._actions, this.model, this.contextMenuService), { icon: showIcon, label: false });
-		} else if (this._moreActions !== undefined) {
-			this._moreActions.clear();
 		}
 	}
 
