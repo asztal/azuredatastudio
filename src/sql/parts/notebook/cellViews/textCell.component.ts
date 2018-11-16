@@ -16,13 +16,9 @@ import { ICellModel } from 'sql/parts/notebook/models/modelInterfaces';
 import { ISanitizer, defaultSanitizer } from 'sql/parts/notebook/outputs/sanitizer';
 import { localize } from 'vs/nls';
 import { NotebookModel } from 'sql/parts/notebook/models/notebookModel';
-import { Action } from 'vs/base/common/actions';
-import { ActionBar, ActionsOrientation } from 'vs/base/browser/ui/actionbar/actionbar';
 import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
-import { DeleteCellAction, AddCellAction, NotebookCellToggleMoreActon } from 'sql/parts/notebook/cellViews/codeActions';
-import { CellTypes } from 'sql/parts/notebook/models/contracts';
+import { NotebookCellToggleMoreActon } from 'sql/parts/notebook/cellViews/codeActions';
 import { INotificationService } from 'vs/platform/notification/common/notification';
-import { ToggleMoreWidgetAction } from 'sql/parts/dashboard/common/actions';
 import { IContextMenuService } from 'vs/platform/contextview/browser/contextView';
 
 export const TEXT_SELECTOR: string = 'text-cell-component';
@@ -80,7 +76,7 @@ export class TextCellComponent extends CellView implements OnInit, OnChanges {
 
 	ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
 		this.updatePreview();
-		if (this._toggleMoreActions !== undefined) {
+		if (this._toggleMoreActions) {
 			this._toggleMoreActions.onChange(this.cellModel, changes);
 		}
 	}

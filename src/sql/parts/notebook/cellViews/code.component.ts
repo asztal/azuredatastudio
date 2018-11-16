@@ -99,7 +99,7 @@ export class CodeComponent extends AngularDisposable implements OnInit, OnChange
 	ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
 		this.updateLanguageMode();
 		this.updateModel();
-		if (this._toggleMoreActions !== undefined) {
+		if (this._toggleMoreActions) {
 			this._toggleMoreActions.onChange(this.cellModel, changes);
 		}
 	}

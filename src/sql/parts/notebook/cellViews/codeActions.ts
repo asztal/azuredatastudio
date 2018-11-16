@@ -10,8 +10,6 @@ import { CellType, CellTypes } from 'sql/parts/notebook/models/contracts';
 import { NotebookModel } from 'sql/parts/notebook/models/notebookModel';
 import { getErrorMessage } from 'sql/parts/notebook/notebookUtils';
 import { INotificationService, Severity } from 'vs/platform/notification/common/notification';
-import { NOTFOUND } from 'dns';
-import { NsfwWatcherService } from 'vs/workbench/services/files/node/watcher/nsfw/nsfwWatcherService';
 import { ActionBar, ActionsOrientation } from 'vs/base/browser/ui/actionbar/actionbar';
 import { Inject, ElementRef, SimpleChange } from '@angular/core/src/core';
 import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
@@ -53,7 +51,7 @@ export class AddCellAction extends Action {
 				if (!model) {
 					return;
 				}
-				if (model.activeCell === undefined) {
+				if (model.activeCell) {
 					this.notificationService.notify({
 						severity: Severity.Error,
 						message: notebookMoreActionMsg
@@ -90,7 +88,7 @@ export class DeleteCellAction extends Action {
 				if (!model) {
 					return;
 				}
-				if (model.activeCell === undefined) {
+				if (model.activeCell) {
 					this.notificationService.notify({
 						severity: Severity.Error,
 						message: notebookMoreActionMsg
@@ -137,7 +135,7 @@ export class NotebookCellToggleMoreActon {
 	toggle(showIcon: boolean): void {
 		if (showIcon) {
 			this._moreActions.push(this._instantiationService.createInstance(ToggleMoreWidgetAction, this._actions, this.model, this.contextMenuService), { icon: showIcon, label: false });
-		} else if (this._moreActions !== undefined) {
+		} else if (this._moreActions) {
 			this._moreActions.clear();
 		}
 	}
