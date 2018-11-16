@@ -69,6 +69,7 @@ export class TextCellComponent extends CellView implements OnInit, OnChanges {
 			this.moreactionsElement,
 			this.model);
 	}
+
 	get activeCellId(): string {
 		return this._activeCellId;
 	}
@@ -79,18 +80,8 @@ export class TextCellComponent extends CellView implements OnInit, OnChanges {
 
 	ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
 		this.updatePreview();
-		for (let propName in changes) {
-			if (propName === 'activeCellId') {
-				let changedProp = changes[propName];
-				if (changedProp.currentValue !== undefined && this._toggleMoreActions !== undefined) {
-					if (this.cellModel.id === changedProp.currentValue) {
-						this._toggleMoreActions.toggle(true);
-					}
-					else {
-						this._toggleMoreActions.toggle(false);
-					}
-				}
-			}
+		if (this._toggleMoreActions !== undefined) {
+			this._toggleMoreActions.onChange(this.cellModel, changes);
 		}
 	}
 
@@ -146,6 +137,8 @@ export class TextCellComponent extends CellView implements OnInit, OnChanges {
 	private updateTheme(theme: IColorTheme): void {
 		let outputElement = <HTMLElement>this.output.nativeElement;
 		outputElement.style.borderTopColor = theme.getColor(themeColors.SIDE_BAR_BACKGROUND, true).toString();
+		let moreactionsEl = <HTMLElement>this.moreactionsElement.nativeElement;
+		moreactionsEl.style.borderRightColor = theme.getColor(themeColors.SIDE_BAR_BACKGROUND, true).toString();
 	}
 
 	public handleContentChanged(): void {

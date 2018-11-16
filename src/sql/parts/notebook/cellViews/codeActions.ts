@@ -13,10 +13,11 @@ import { INotificationService, Severity } from 'vs/platform/notification/common/
 import { NOTFOUND } from 'dns';
 import { NsfwWatcherService } from 'vs/workbench/services/files/node/watcher/nsfw/nsfwWatcherService';
 import { ActionBar, ActionsOrientation } from 'vs/base/browser/ui/actionbar/actionbar';
-import { Inject, ElementRef } from '@angular/core/src/core';
+import { Inject, ElementRef, SimpleChange } from '@angular/core/src/core';
 import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
 import { IContextMenuService } from 'vs/platform/contextview/browser/contextView';
 import { ToggleMoreWidgetAction } from 'sql/parts/dashboard/common/actions';
+import { ICellModel } from 'sql/parts/notebook/models/modelInterfaces';
 
 let notebookMoreActionMsg = localize('notebook.failed', "Please select active cell and try again");
 export class RunCellAction extends Action {
@@ -133,11 +134,26 @@ export class NotebookCellToggleMoreActon {
 		this._moreActions.context = { target: moreActionsElement };
 	}
 
-	public toggle(showIcon: boolean): void {
+	toggle(showIcon: boolean): void {
 		if (showIcon) {
 			this._moreActions.push(this._instantiationService.createInstance(ToggleMoreWidgetAction, this._actions, this.model, this.contextMenuService), { icon: showIcon, label: false });
 		} else if (this._moreActions !== undefined) {
 			this._moreActions.clear();
+		}
+	}
+
+	public onChange(cellModel: ICellModel, changes: { [propKey: string]: SimpleChange }): void {
+		for (let propName in changes) {
+			if (propName === 'activeCellId') {
+				let changedProp = changes[propName];
+				if (cellModel.id === changedProp.currentValue) {
+					this.toggle(true);
+				}
+				else {
+					this.toggle(false);
+				}
+				break;
+			}
 		}
 	}
 }

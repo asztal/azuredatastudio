@@ -29,7 +29,7 @@ import { IModelService } from 'vs/editor/common/services/modelService';
 import { IContextMenuService, IContextViewService } from 'vs/platform/contextview/browser/contextView';
 import { ICellModel } from 'sql/parts/notebook/models/modelInterfaces';
 import { Taskbar } from 'sql/base/browser/ui/taskbar/taskbar';
-import { RunCellAction, DeleteCellAction, AddCellAction } from 'sql/parts/notebook/cellViews/codeActions';
+import { RunCellAction, NotebookCellToggleMoreActon } from 'sql/parts/notebook/cellViews/codeActions';
 import { NotebookModel } from 'sql/parts/notebook/models/notebookModel';
 import { ToggleMoreWidgetAction } from 'sql/parts/dashboard/common/actions';
 import { CellTypes } from 'sql/parts/notebook/models/contracts';
@@ -58,15 +58,14 @@ export class CodeComponent extends AngularDisposable implements OnInit, OnChange
 	}
 
 	protected _actionBar: Taskbar;
-	protected _moreActions: ActionBar;
 	private readonly _minimumHeight = 30;
 	private _editor: QueryTextEditor;
 	private _editorInput: UntitledEditorInput;
 	private _editorModel: ITextModel;
 	private _uri: string;
 	private _model: NotebookModel;
-	private _actions: Action[] = [];
 	private _activeCellId: string;
+	private _toggleMoreActions: NotebookCellToggleMoreActon;
 
 	constructor(
 		@Inject(forwardRef(() => CommonServiceInterface)) private _bootstrapService: CommonServiceInterface,
@@ -86,27 +85,22 @@ export class CodeComponent extends AngularDisposable implements OnInit, OnChange
 		this._register(this.themeService.onDidColorThemeChange(this.updateTheme, this));
 		this.updateTheme(this.themeService.getColorTheme());
 		this.initActionBar();
-		this._actions.push(this._instantiationService.createInstance(AddCellAction, 'codeBefore', localize('codeBefore', 'Insert Code before'), CellTypes.Code, false));
-		this._actions.push(this._instantiationService.createInstance(AddCellAction, 'codeAfter', localize('codeAfter', 'Insert Code after'), CellTypes.Code, true));
-		this._actions.push(this._instantiationService.createInstance(AddCellAction, 'markdownBefore', localize('markdownBefore', 'Insert Markdown before'), CellTypes.Markdown, false));
-		this._actions.push(this._instantiationService.createInstance(AddCellAction, 'markdownAfter', localize('markdownAfter', 'Insert Markdown after'), CellTypes.Markdown, false));
-		this._actions.push(this._instantiationService.createInstance(DeleteCellAction, 'delete', localize('delete', 'delete'), CellTypes.Code, true));
+	}
+
+	ngAfterViewInit() {
+		this._toggleMoreActions = new NotebookCellToggleMoreActon(
+			this._instantiationService,
+			this.contextMenuService,
+			this.notificationService,
+			this.moreactionsElement,
+			this.model);
 	}
 
 	ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
 		this.updateLanguageMode();
 		this.updateModel();
-		for (let propName in changes) {
-			if (propName === 'activeCellId') {
-				let changedProp = changes[propName];
-				if (this.cellModel.id === changedProp.currentValue) {
-					this.toggleMoreAcitons(true);
-				}
-				else {
-					this.toggleMoreAcitons(false);
-				}
-				break;
-			}
+		if (this._toggleMoreActions !== undefined) {
+			this._toggleMoreActions.onChange(this.cellModel, changes);
 		}
 	}
 
@@ -167,17 +161,6 @@ export class CodeComponent extends AngularDisposable implements OnInit, OnChange
 			{ action: runCellAction }
 		]);
 
-	}
-	
-	private toggleMoreAcitons(showIcon: boolean) {
-		if (showIcon) {
-			let moreActionsElement = <HTMLElement>this.moreactionsElement.nativeElement;
-			this._moreActions = new ActionBar(moreActionsElement, { orientation: ActionsOrientation.VERTICAL });
-			this._moreActions.context = { target: moreActionsElement };
-			this._moreActions.push(this._instantiationService.createInstance(ToggleMoreWidgetAction, this._actions, this.model, this.contextMenuService), { icon: showIcon, label: false });
-		} else if (this._moreActions !== undefined) {
-				this._moreActions.clear();
-		}
 	}
 
 	private createUri(): URI {
