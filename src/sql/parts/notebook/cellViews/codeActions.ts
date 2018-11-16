@@ -6,12 +6,17 @@
 import { Action } from 'vs/base/common/actions';
 import { TPromise } from 'vs/base/common/winjs.base';
 import { localize } from 'vs/nls';
-import { CellType } from 'sql/parts/notebook/models/contracts';
+import { CellType, CellTypes } from 'sql/parts/notebook/models/contracts';
 import { NotebookModel } from 'sql/parts/notebook/models/notebookModel';
 import { getErrorMessage } from 'sql/parts/notebook/notebookUtils';
 import { INotificationService, Severity } from 'vs/platform/notification/common/notification';
 import { NOTFOUND } from 'dns';
 import { NsfwWatcherService } from 'vs/workbench/services/files/node/watcher/nsfw/nsfwWatcherService';
+import { ActionBar, ActionsOrientation } from 'vs/base/browser/ui/actionbar/actionbar';
+import { Inject, ElementRef } from '@angular/core/src/core';
+import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
+import { IContextMenuService } from 'vs/platform/contextview/browser/contextView';
+import { ToggleMoreWidgetAction } from 'sql/parts/dashboard/common/actions';
 
 let notebookMoreActionMsg = localize('notebook.failed', "Please select active cell and try again");
 export class RunCellAction extends Action {
