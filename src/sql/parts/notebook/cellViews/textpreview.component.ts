@@ -35,11 +35,11 @@ import { ISanitizer, defaultSanitizer } from 'sql/parts/notebook/outputs/sanitiz
 import { ICommandService } from 'vs/platform/commands/common/commands';
 import { IContextMenuService } from 'vs/platform/contextview/browser/contextView';
 
-export const CODE_SELECTOR: string = 'text-component';
+export const CODE_SELECTOR: string = 'textpreview-component';
 
 @Component({
 	selector: CODE_SELECTOR,
-	templateUrl: decodeURI(require.toUrl('./text.component.html'))
+	templateUrl: decodeURI(require.toUrl('./textpreview.component.html'))
 })
 export class TextPreviewComponent extends AngularDisposable implements OnInit, OnChanges {
 	@ViewChild('preview', { read: ElementRef }) private output: ElementRef;
@@ -86,7 +86,6 @@ export class TextPreviewComponent extends AngularDisposable implements OnInit, O
 		this._actions.push(this._instantiationService.createInstance(AddCellAction, 'markdownBefore', localize('markdownBefore', 'Insert Markdown before'), CellTypes.Markdown, false, this.notificationService));;
 		this._actions.push(this._instantiationService.createInstance(AddCellAction, 'markdownAfter', localize('markdownAfter', 'Insert Markdown after'), CellTypes.Markdown, false, this.notificationService));
 		this._actions.push(this._instantiationService.createInstance(DeleteCellAction, 'delete', localize('delete', 'delete'), CellTypes.Code, true, this.notificationService));
-		this.toggleMoreAcitons(true);
 	}
 
 	ngOnChanges(changes: { [propKey: string]: SimpleChange }) {
