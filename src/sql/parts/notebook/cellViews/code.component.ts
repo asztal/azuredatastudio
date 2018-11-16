@@ -46,6 +46,7 @@ export class CodeComponent extends AngularDisposable implements OnInit, OnChange
 	@ViewChild('moreactions', { read: ElementRef }) private moreactionsElement: ElementRef;
 	@ViewChild('editor', { read: ElementRef }) private codeElement: ElementRef;
 	@Input() cellModel: ICellModel;
+	@Input() hasVerticalToolbar: boolean;
 
 	@Output() public onContentChanged = new EventEmitter<void>();
 
@@ -84,7 +85,9 @@ export class CodeComponent extends AngularDisposable implements OnInit, OnChange
 	ngOnInit() {
 		this._register(this.themeService.onDidColorThemeChange(this.updateTheme, this));
 		this.updateTheme(this.themeService.getColorTheme());
-		this.initActionBar();
+		if (this.hasVerticalToolbar) {
+			this.initActionBar();
+		}
 	}
 
 	ngAfterViewInit() {
