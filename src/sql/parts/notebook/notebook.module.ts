@@ -29,6 +29,7 @@ import { TextCellComponent } from 'sql/parts/notebook/cellViews/textCell.compone
 import { OutputAreaComponent } from 'sql/parts/notebook/cellViews/outputArea.component';
 import { OutputComponent } from 'sql/parts/notebook/cellViews/output.component';
 import LoadingSpinner from 'sql/parts/modelComponents/loadingSpinner.component';
+import { TextPreviewComponent } from 'sql/parts/notebook/cellViews/textpreview.component';
 
 export const NotebookModule = (params, selector: string, instantiationService: IInstantiationService): any => {
 	@NgModule({
@@ -41,6 +42,7 @@ export const NotebookModule = (params, selector: string, instantiationService: I
 			CodeComponent,
 			CodeCellComponent,
 			TextCellComponent,
+			TextPreviewComponent,
 			NotebookComponent,
 			ComponentHostDirective,
 			OutputAreaComponent,
