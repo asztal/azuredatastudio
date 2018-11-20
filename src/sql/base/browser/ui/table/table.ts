@@ -46,7 +46,7 @@ export class Table<T extends Slick.SlickData> extends Widget implements IThemabl
 	private _onClick = new Emitter<ITableMouseEvent>();
 	public readonly onClick: Event<ITableMouseEvent> = this._onClick.event;
 
-	constructor(parent: HTMLElement, configuration?: ITableConfiguration<T>, options?: Slick.GridOptions<T>) {
+	constructor(parent: HTMLElement, configuration?: ITableConfiguration<T>) {
 		super();
 		if (!configuration || !configuration.dataProvider || isArray(configuration.dataProvider)) {
 			this._data = new TableDataView<T>(configuration && configuration.dataProvider as Array<T>);
@@ -62,7 +62,7 @@ export class Table<T extends Slick.SlickData> extends Widget implements IThemabl
 			this._columns = new Array<Slick.Column<T>>();
 		}
 
-		let newOptions = mixin(options || {}, getDefaultOptions<T>(), false);
+		let newOptions = mixin(configuration.tableOptions || {}, getDefaultOptions<T>(), false);
 
 		this._container = document.createElement('div');
 		this._container.className = 'monaco-table';

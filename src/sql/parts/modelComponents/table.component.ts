@@ -95,14 +95,14 @@ export default class TableComponent extends ComponentBase implements IComponent,
 		if (this._inputContainer) {
 			this._tableData = new TableDataView<Slick.SlickData>();
 
-			let options = <Slick.GridOptions<any>>{
+			let tableOptions = <Slick.GridOptions<any>>{
 				syncColumnCellResize: true,
 				enableColumnReorder: false,
 				enableCellNavigation: true,
 				forceFitColumns: true
 			};
 
-			this._table = new Table<Slick.SlickData>(this._inputContainer.nativeElement, { dataProvider: this._tableData, columns: this._tableColumns }, options);
+			this._table = new Table<Slick.SlickData>(this._inputContainer.nativeElement, { dataProvider: this._tableData, columns: this._tableColumns, tableOptions });
 			this._table.setData(this._tableData);
 			this._table.setSelectionModel(new RowSelectionModel({ selectActiveRow: true }));
 

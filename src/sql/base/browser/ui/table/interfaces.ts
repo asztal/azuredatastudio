@@ -28,4 +28,5 @@ export interface ITableConfiguration<T> {
 	dataProvider?: IDisposableDataProvider<T> | Array<T>;
 	columns?: Slick.Column<T>[];
 	sorter?: ITableSorter<T>;
+	tableOptions?: Slick.GridOptions<T>;
 }

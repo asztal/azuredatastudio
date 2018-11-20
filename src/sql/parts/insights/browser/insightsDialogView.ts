@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import 'vs/css!sql/parts/insights/browser/media/insightsDialog';
+import 'vs/css!./media/insightsDialog';
 
 import { Button } from 'sql/base/browser/ui/button/button';
 import { IConnectionProfile } from 'sql/parts/connection/common/interfaces';
@@ -19,14 +19,12 @@ import { RowSelectionModel } from 'sql/base/browser/ui/table/plugins/rowSelectio
 import { error } from 'sql/base/common/log';
 import { Table } from 'sql/base/browser/ui/table/table';
 import { CopyInsightDialogSelectionAction } from 'sql/parts/insights/common/insightDialogActions';
-import { SplitView, ViewSizing } from 'sql/base/browser/ui/splitview/splitview';
 
 import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
 import { IPartService } from 'vs/workbench/services/part/common/partService';
 import * as DOM from 'vs/base/browser/dom';
 import { IDisposable, dispose } from 'vs/base/common/lifecycle';
 import { IThemeService } from 'vs/platform/theme/common/themeService';
-import { IListService } from 'vs/platform/list/browser/listService';
 import * as nls from 'vs/nls';
 import { IContextMenuService } from 'vs/platform/contextview/browser/contextView';
 import { IAction } from 'vs/base/common/actions';
@@ -40,6 +38,9 @@ import { ICommandService } from 'vs/platform/commands/common/commands';
 import { MenuRegistry, ExecuteCommandAction } from 'vs/platform/actions/common/actions';
 import { ICapabilitiesService } from 'sql/services/capabilities/capabilitiesService';
 import { IClipboardService } from 'sql/platform/clipboard/common/clipboardService';
+import { SplitView, Sizing } from 'vs/base/browser/ui/splitview/splitview';
+import { IKeybindingService } from 'vs/platform/keybinding/common/keybinding';
+import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
 
 const labelDisplay = nls.localize("insights.item", "Item");
 const valueDisplay = nls.localize("insights.value", "Value");
@@ -124,16 +125,17 @@ export class InsightsDialogView extends Modal {
 
 	constructor(
 		private _model: IInsightsDialogModel,
-		@IInstantiationService private _instantiationService: IInstantiationService,
 		@IThemeService themeService: IThemeService,
-		@IListService private _listService: IListService,
 		@IPartService partService: IPartService,
-		@IContextMenuService private _contextMenuService: IContextMenuService,
 		@ITelemetryService telemetryService: ITelemetryService,
 		@IContextKeyService contextKeyService: IContextKeyService,
+		@IContextMenuService private _contextMenuService: IContextMenuService,
+		@IInstantiationService private _instantiationService: IInstantiationService,
 		@ICommandService private _commandService: ICommandService,
 		@ICapabilitiesService private _capabilitiesService: ICapabilitiesService,
-		@IClipboardService clipboardService: IClipboardService
+		@IClipboardService clipboardService: IClipboardService,
+		@IKeybindingService private _keybindingService: IKeybindingService,
+		@IConfigurationService private _configurationService: IConfigurationService
 	) {
 		super(nls.localize("InsightsDialogTitle", "Insights"), TelemetryKeys.Insights, partService, telemetryService, clipboardService, themeService, contextKeyService);
 		this._model.onDataChange(e => this.build());
@@ -167,6 +169,7 @@ export class InsightsDialogView extends Modal {
 
 	protected renderBody(container: HTMLElement) {
 		this._container = container;
+		container.classList.add('insights');
 
 		this._splitView = new SplitView(container);
 
@@ -175,11 +178,18 @@ export class InsightsDialogView extends Modal {
 
 		this._topTableData = new TableDataView();
 		this._bottomTableData = new TableDataView();
-		let topTableView = new TableCollapsibleView(itemsHeaderTitle, { sizing: ViewSizing.Flexible, ariaHeaderLabel: itemsHeaderTitle }, this._topTableData, this._topColumns, { forceFitColumns: true });
+		let topTableView = new TableCollapsibleView<ListResource>(
+			{ id: 'insightDialogTop', title: itemsHeaderTitle, tableConfigurations: { dataProvider: this._topTableData, columns: this._topColumns, tableOptions: { forceFitColumns: true }}},
+			this._keybindingService,
+			this._contextMenuService,
+			this._configurationService,
+			this._themeService
+		);
 		this._topTable = topTableView.table;
-		topTableView.addContainerClass('insights');
 		this._topTable.setSelectionModel(new RowSelectionModel<ListResource>());
-		let bottomTableView = new TableCollapsibleView(itemsDetailHeaderTitle, { sizing: ViewSizing.Flexible, ariaHeaderLabel: itemsDetailHeaderTitle }, this._bottomTableData, this._bottomColumns, { forceFitColumns: true });
+		let bottomTableView = new TableCollapsibleView<ListResource>(
+			{ id: 'insightDialogBottom', title: itemsDetailHeaderTitle, tableConfigurations: { dataProvider: this._bottomTableData, columns: this._bottomColumns, tableOptions: { forceFitColumns: true }}},
+			this._keybindingService, this._contextMenuService, this._configurationService, this._themeService);
 		this._bottomTable = bottomTableView.table;
 		this._bottomTable.setSelectionModel(new RowSelectionModel<ListResource>());
 
@@ -193,13 +203,6 @@ export class InsightsDialogView extends Modal {
 
 				this._bottomTableData.clear();
 				this._bottomTableData.push(resourceArray);
-				// this table view has to be collapsed and expanded
-				// because the initial expand doesn't have the
-				// loaded data
-				if (bottomTableView.isExpanded()) {
-					bottomTableView.collapse();
-					bottomTableView.expand();
-				}
 				this._enableTaskButtons(true);
 			} else {
 				this._enableTaskButtons(false);
@@ -224,8 +227,8 @@ export class InsightsDialogView extends Modal {
 			});
 		}));
 
-		this._splitView.addView(topTableView);
-		this._splitView.addView(bottomTableView);
+		this._splitView.addView(topTableView, Sizing.Distribute);
+		this._splitView.addView(bottomTableView, Sizing.Distribute);
 
 		this._register(attachTableStyler(this._topTable, this._themeService));
 		this._register(attachTableStyler(this._bottomTable, this._themeService));
