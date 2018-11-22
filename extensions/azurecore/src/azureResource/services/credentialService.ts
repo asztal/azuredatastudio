@@ -35,9 +35,20 @@ export class AzureResourceCredentialService implements IAzureResourceCredentialS
 
 			return credentials;
 		} catch (error) {
-			throw new AzureResourceCredentialError(localize('azureResource.services.credentialService.credentialError', 'Failed to get credential for account {0}. Please refresh the account.', account.key.accountId), error);
+			throw new AzureResourceCredentialError(localize(AzureResourceCredentialService.credentialError, 'Failed to get credential for account {0}. Please refresh the account.', account.key.accountId), error);
+		}
+	}
+
+	public async getCredential(account: Account, tenantId: string): Promise<ServiceClientCredentials> {
+		try {
+			let tokens = await this._apiWrapper.getSecurityToken(account);
+
+			return new TokenCredentials(tokens[tenantId].token, tokens[tenantId].tokenType);
+		} catch (error) {
+			throw new AzureResourceCredentialError(localize(AzureResourceCredentialService.credentialError, 'Failed to get credential for account {0} on tenant {1}. Please refresh the account.', account.key.accountId, tenantId), error);
 		}
 	}
 
 	private _apiWrapper: ApiWrapper = undefined;
+	private static readonly credentialError = 'azure.resource.services.credentialService.credentialError';
 }

@@ -5,21 +5,11 @@
 
 'use strict';
 
-export interface AzureResourceSubscription {
-	id: string;
-	name: string;
-}
+import { AzureResourceSubscription } from 'sqlops';
+import { ServiceClientCredentials } from 'ms-rest';
 
-export interface AzureResourceDatabaseServer {
-	name: string;
-	fullName: string;
-	loginName: string;
-	defaultDatabaseName: string;
-}
+import { AzureResourceDatabaseServer } from './models';
 
-export interface AzureResourceDatabase {
-	name: string;
-	serverName: string;
-	serverFullName: string;
-	loginName: string;
+export interface IAzureResourceDatabaseServerService {
+	getDatabaseServers(subscription: AzureResourceSubscription, credential: ServiceClientCredentials): Promise<AzureResourceDatabaseServer[]>;
 }

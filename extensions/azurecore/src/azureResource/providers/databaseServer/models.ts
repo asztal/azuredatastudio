@@ -5,8 +5,9 @@
 
 'use strict';
 
-import { AzureResourceTreeNode } from './baseTreeNodes';
-
-export interface IAzureResourceTreeChangeHandler {
-	notifyNodeChanged(node: AzureResourceTreeNode): void;
+export interface AzureResourceDatabaseServer {
+	name: string;
+	fullName: string;
+	loginName: string;
+	defaultDatabaseName: string;
 }

@@ -5,8 +5,11 @@
 
 'use strict';
 
-import { AzureResourceTreeNode } from './baseTreeNodes';
+import { AzureResourceSubscription } from 'sqlops';
+import { ServiceClientCredentials } from 'ms-rest';
 
-export interface IAzureResourceTreeChangeHandler {
-	notifyNodeChanged(node: AzureResourceTreeNode): void;
+import { AzureResourceDatabase } from './models';
+
+export interface IAzureResourceDatabaseService {
+	getDatabases(subscription: AzureResourceSubscription, credential: ServiceClientCredentials): Promise<AzureResourceDatabase[]>;
 }

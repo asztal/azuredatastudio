@@ -2270,4 +2270,39 @@ declare module 'sqlops' {
 		*/
 		export function registerTask(task: string, callback: ITaskHandler, thisArg?: any): vscode.Disposable;
 	}
+
+	// Azure resource provider interfaces  -----------------------------------------------------------------------
+
+	export interface AzureResourceSubscription {
+		id: string;
+		name: string;
+		tenantId: string;
+	}
+
+	export interface AzureResourceCommand {
+		id: string;
+		callback: (...args: any[]) => any;
+		thisArg?: any
+	}
+
+	export interface IAzureResourceProvider extends DataProvider {
+		getCommands(): Promise<AzureResourceCommand[]>;
+
+		getRootNode(account: Account, subscription: AzureResourceSubscription, credential: any): Promise<AzureResourceNode>;
+	}
+
+	export interface AzureResourceNodeCallbacks {
+		getChildren(): Promise<AzureResourceNode[]>;
+	}
+
+	export interface AzureResourceNode {
+		id: string;
+		label: string;
+		nodePath: string;
+		isLeaf: boolean;
+		itemType: string;
+		itemValue: any;
+		iconPath: { dark: string | vscode.Uri; light: string | vscode.Uri };
+		callbacks: AzureResourceNodeCallbacks;
+	}
 }

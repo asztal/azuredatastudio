@@ -5,8 +5,4 @@
 
 'use strict';
 
-import { AzureResourceTreeNode } from './baseTreeNodes';
-
-export interface IAzureResourceTreeChangeHandler {
-	notifyNodeChanged(node: AzureResourceTreeNode): void;
-}
+export const treeLocalizationIdPrefix = 'azure.resource.explorer.tree';

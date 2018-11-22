@@ -5,47 +5,30 @@
 
 'use strict';
 
-import { TreeItem, TreeItemCollapsibleState } from 'vscode';
-import { NodeInfo } from 'sqlops';
-import { TreeNode } from '../../treeNodes';
 import * as nls from 'vscode-nls';
 const localize = nls.loadMessageBundle();
 
-import { AzureResourceItemType } from '../constants';
+import { AzureResourceTreeNode } from './baseTreeNodes';
+import { treeLocalizationIdPrefix } from './constants';
 
-export class AzureResourceAccountNotSignedInTreeNode extends TreeNode {
-	public getChildren(): TreeNode[] | Promise<TreeNode[]> {
-		return [];
-	}
+export class AzureResourceAccountNotSignedInTreeNode extends AzureResourceTreeNode {
+	public constructor(
+	) {
+		super(undefined);
 
-	public getTreeItem(): TreeItem | Promise<TreeItem> {
-		let item = new TreeItem(AzureResourceAccountNotSignedInTreeNode.SignInLabel, TreeItemCollapsibleState.None);
-		item.contextValue = AzureResourceItemType.message;
-		item.command = {
-			title: AzureResourceAccountNotSignedInTreeNode.SignInLabel,
-			command: 'azureresource.signin',
+		this.id = 'message_accountNotSignedIn';
+		this.label = AzureResourceAccountNotSignedInTreeNode.signInLabel;
+		this.isLeaf = true;
+		this.nodePath = this.id;
+		this.itemType = 'azure.resource.itemType.message';
+		this.iconPath = undefined;
+		this.callbacks = undefined;
+		this.command = {
+			title: AzureResourceAccountNotSignedInTreeNode.signInLabel,
+			command: 'azure.resource.signin',
 			arguments: [this]
 		};
-		return item;
 	}
 
-	public getNodeInfo(): NodeInfo {
-		return {
-			label: AzureResourceAccountNotSignedInTreeNode.SignInLabel,
-			isLeaf: true,
-			errorMessage: undefined,
-			metadata: undefined,
-			nodePath: this.generateNodePath(),
-			nodeStatus: undefined,
-			nodeType: AzureResourceItemType.message,
-			nodeSubType: undefined,
-			iconType: AzureResourceItemType.message
-		};
-	}
-
-	public get nodePathValue(): string {
-		return 'message_accountNotSignedIn';
-	}
-
-	private static readonly SignInLabel = localize('azureResource.tree.accountNotSignedInTreeNode.signIn', 'Sign in to Azure ...');
+	private static readonly signInLabel = localize(`${treeLocalizationIdPrefix}.accountNotSignedInTreeNode.signIn`, 'Sign in to Azure ...');
 }

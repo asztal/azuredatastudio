@@ -6,10 +6,14 @@
 'use strict';
 
 import { ServiceClientCredentials } from 'ms-rest';
-import { Account, DidChangeAccountsParams } from 'sqlops';
+import { Account, DidChangeAccountsParams, IConnectionProfile, IConnectionCompletionOptions, connection, AzureResourceSubscription } from 'sqlops';
 import { Event } from 'vscode';
 
-import { AzureResourceSubscription, AzureResourceDatabaseServer, AzureResourceDatabase } from './models';
+export interface IAzureResourceLogService {
+    logInfo(info: string);
+
+    logError(error: any);
+}
 
 export interface IAzureResourceAccountService {
 	getAccounts(): Promise<Account[]>;
@@ -19,6 +23,8 @@ export interface IAzureResourceAccountService {
 
 export interface IAzureResourceCredentialService {
 	getCredentials(account: Account): Promise<ServiceClientCredentials[]>;
+
+	getCredential(account: Account, tenantId: string): Promise<ServiceClientCredentials>;
 }
 
 export interface IAzureResourceSubscriptionService {
@@ -31,15 +37,9 @@ export interface IAzureResourceSubscriptionFilterService {
 	saveSelectedSubscriptions(account: Account, selectedSubscriptions: AzureResourceSubscription[]): Promise<void>;
 }
 
-export interface IAzureResourceDatabaseServerService {
-	getDatabaseServers(subscription: AzureResourceSubscription, credentials: ServiceClientCredentials[]): Promise<AzureResourceDatabaseServer[]>;
-}
-
-export interface IAzureResourceDatabaseService {
-	getDatabases(subscription: AzureResourceSubscription, credentials: ServiceClientCredentials[]): Promise<AzureResourceDatabase[]>;
-}
-
 export interface IAzureResourceCacheService {
+	generateKey(id: string): string;
+
 	get<T>(key: string): T | undefined;
 
 	update<T>(key: string, value: T): void;
@@ -48,7 +48,12 @@ export interface IAzureResourceCacheService {
 export interface IAzureResourceContextService {
 	getAbsolutePath(relativePath: string): string;
 
+	registerCommand(commandId: string, callback: (...args: any[]) => any, thisArg?: any): void;
+
 	executeCommand(commandId: string, ...args: any[]): void;
+
+	openConnectionDialog(providers?: string[], initialConnectionProfile?: IConnectionProfile, connectionCompletionOptions?: IConnectionCompletionOptions): Thenable<connection.Connection>;
 
 	showErrorMessage(errorMessage: string): void;
 }
+

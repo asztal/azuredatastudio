@@ -1,0 +1,16 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"title": "Azure Resource Provider contributions to package.json",
+	"type": "object",
+	"properties": {
+		"contributes": {
+			"type": "object",
+			"properties": {
+				"azureResourceProvider": {
+					"type": "boolean",
+					"description": "Does this extension contribute an azure resource provider?"
+				}
+			}
+		}
+	}
+}

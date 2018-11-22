@@ -10,10 +10,9 @@ import {
 	IAzureResourceCredentialService,
 	IAzureResourceSubscriptionService,
 	IAzureResourceSubscriptionFilterService,
-	IAzureResourceDatabaseService,
-	IAzureResourceDatabaseServerService,
 	IAzureResourceCacheService,
-	IAzureResourceContextService } from './interfaces';
+	IAzureResourceContextService,
+	IAzureResourceLogService} from './interfaces';
 
 export class AzureResourceServicePool {
 	private constructor() { }
@@ -22,14 +21,13 @@ export class AzureResourceServicePool {
 		return AzureResourceServicePool._instance;
 	}
 
+	public logService: IAzureResourceLogService;
 	public contextService: IAzureResourceContextService;
 	public cacheService: IAzureResourceCacheService;
 	public accountService: IAzureResourceAccountService;
 	public credentialService: IAzureResourceCredentialService;
 	public subscriptionService: IAzureResourceSubscriptionService;
 	public subscriptionFilterService: IAzureResourceSubscriptionFilterService;
-	public databaseService: IAzureResourceDatabaseService;
-	public databaseServerService: IAzureResourceDatabaseServerService;
 
 	private static readonly _instance = new AzureResourceServicePool();
 }

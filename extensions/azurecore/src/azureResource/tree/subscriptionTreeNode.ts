@@ -5,61 +5,58 @@
 
 'use strict';
 
-import { TreeItem, TreeItemCollapsibleState } from 'vscode';
-import { Account, NodeInfo } from 'sqlops';
-import { TreeNode } from '../../treeNodes';
+import { Account, AzureResourceNode, AzureResourceSubscription } from 'sqlops';
+import * as nls from 'vscode-nls';
+const localize = nls.loadMessageBundle();
 
-import { AzureResourceTreeNodeBase, AzureResourceContainerTreeNodeBase } from './baseTreeNodes';
-import { AzureResourceItemType } from '../constants';
-import { AzureResourceDatabaseContainerTreeNode } from './databaseContainerTreeNode';
-import { AzureResourceDatabaseServerContainerTreeNode } from './databaseServerContainerTreeNode';
-import { AzureResourceSubscription } from '../models';
-import { IAzureResourceTreeChangeHandler } from './treeChangeHandler';
+import { AzureResourceTreeNode, AzureResourceContainerTreeNode } from './baseTreeNodes';
+import { treeLocalizationIdPrefix } from './constants';
+import { AzureResourceMessageTreeNode } from './messageTreeNode';
+import { AzureResourceErrorMessageUtil } from '../utils';
+import { AzureResourceService } from '../resourceService';
 
-export class AzureResourceSubscriptionTreeNode extends AzureResourceTreeNodeBase {
+export class AzureResourceSubscriptionTreeNode extends AzureResourceContainerTreeNode {
 	public constructor(
-		public readonly subscription: AzureResourceSubscription,
 		account: Account,
-		treeChangeHandler: IAzureResourceTreeChangeHandler,
-		parent: TreeNode
+		public readonly subscription: AzureResourceSubscription,
+		parent: AzureResourceTreeNode
 	) {
-		super(treeChangeHandler, parent);
+		super(account, parent);
 
-		this._children.push(new AzureResourceDatabaseContainerTreeNode(subscription, account, treeChangeHandler, this));
-		this._children.push(new AzureResourceDatabaseServerContainerTreeNode(subscription, account, treeChangeHandler, this));
-	}
-
-	public async getChildren(): Promise<TreeNode[]> {
-		return this._children;
-	}
-
-	public getTreeItem(): TreeItem | Promise<TreeItem> {
-		let item = new TreeItem(this.subscription.name, TreeItemCollapsibleState.Collapsed);
-		item.contextValue = AzureResourceItemType.subscription;
-		item.iconPath = {
+		this.id = `subscription_${this.subscription.id}`;
+		this.label = this.subscription.name;
+		this.isLeaf = false;
+		this.nodePath = this.id;
+		this.itemType = 'azure.resource.itemType.subscription';
+		this.itemValue = subscription;
+		this.iconPath = {
 			dark: this.servicePool.contextService.getAbsolutePath('resources/dark/subscription_inverse.svg'),
 			light: this.servicePool.contextService.getAbsolutePath('resources/light/subscription.svg')
 		};
-		return item;
+
+		this.setCacheKey(`account_${account.key.accountId}.subscription_${this.subscription.id}.resources`);
 	}
 
-	public getNodeInfo(): NodeInfo {
-		return {
-			label: this.subscription.name,
-			isLeaf: false,
-			errorMessage: undefined,
-			metadata: undefined,
-			nodePath: this.generateNodePath(),
-			nodeStatus: undefined,
-			nodeType: AzureResourceItemType.subscription,
-			nodeSubType: undefined,
-			iconType: AzureResourceItemType.subscription
-		};
+	public async getChildren(): Promise<AzureResourceTreeNode[]> {
+		try {
+			const azureResourceService = AzureResourceService.getInstance();
+
+			const children: AzureResourceNode[] = [];
+
+			const credential = await this.servicePool.credentialService.getCredential(this.account, this.subscription.tenantId);
+			for (const resourceProviderId of await azureResourceService.listResourceProviderIds()) {
+				children.push(await azureResourceService.getRootNode(resourceProviderId, this.account, this.subscription, credential));
+			}
+
+			if (children.length === 0) {
+				return ([AzureResourceMessageTreeNode.create(AzureResourceSubscriptionTreeNode.noResources, this)]);
+			} else {
+				return children.map((child) => AzureResourceTreeNode.fromNodeInfo(child, this));
+			}
+		} catch (error) {
+			return [AzureResourceMessageTreeNode.create(AzureResourceErrorMessageUtil.getErrorMessage(error), this)];
+		}
 	}
 
-	public get nodePathValue(): string {
-		return `subscription_${this.subscription.id}`;
-	}
-
-	private _children: AzureResourceContainerTreeNodeBase[] = [];
+	private static readonly noResources = localize(`${treeLocalizationIdPrefix}.subscriptionTreeNode.noResources`, 'No Resources found.');
 }

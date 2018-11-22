@@ -6,6 +6,7 @@
 'use strict';
 
 import ControllerBase from './controllerBase';
+import { DidChangeAccountsParams } from 'sqlops';
 
 import { AzureResourceTreeProvider } from '../azureResource/tree/treeProvider';
 import { registerAzureResourceCommands } from '../azureResource/commands';
@@ -14,41 +15,36 @@ import { AzureResourceCredentialService } from '../azureResource/services/creden
 import { AzureResourceAccountService } from '../azureResource/services/accountService';
 import { AzureResourceSubscriptionService } from '../azureResource/services/subscriptionService';
 import { AzureResourceSubscriptionFilterService } from '../azureResource/services/subscriptionFilterService';
-import { AzureResourceDatabaseServerService } from '../azureResource/services/databaseServerService';
-import { AzureResourceDatabaseService } from '../azureResource/services/databaseService';
 import { AzureResourceCacheService } from '../azureResource/services/cacheService';
 import { AzureResourceContextService } from '../azureResource/services/contextService';
+import { AzureResourceLogService } from '../azureResource/services/logService';
 
-/**
- * The main controller class that initializes the extension
- */
-export default class MainController extends ControllerBase {
-	// PUBLIC METHODS //////////////////////////////////////////////////////
-	/**
-	 * Deactivates the extension
-	 */
-	public deactivate(): void {
-	}
-
+export default class AzureResourceController extends ControllerBase {
 	public activate(): Promise<boolean> {
-		this.configureAzureResource();
-		return Promise.resolve(true);
-	}
+		const outputChannel = this.apiWrapper.createOutputChannel('Azure Resource');
+		outputChannel.show(false);
 
-	private configureAzureResource(): void {
-		let servicePool = AzureResourceServicePool.getInstance();
-		servicePool.cacheService = new AzureResourceCacheService(this.extensionContext);
+		const cacheService = new AzureResourceCacheService(this.extensionContext);
+
+		const servicePool = AzureResourceServicePool.getInstance();
+		servicePool.logService = new AzureResourceLogService(outputChannel);
+		servicePool.cacheService = cacheService;
 		servicePool.contextService = new AzureResourceContextService(this.extensionContext, this.apiWrapper);
 		servicePool.accountService = new AzureResourceAccountService(this.apiWrapper);
 		servicePool.credentialService = new AzureResourceCredentialService(this.apiWrapper);
 		servicePool.subscriptionService = new AzureResourceSubscriptionService();
-		servicePool.subscriptionFilterService = new AzureResourceSubscriptionFilterService(new AzureResourceCacheService(this.extensionContext));
-		servicePool.databaseService = new AzureResourceDatabaseService();
-		servicePool.databaseServerService = new AzureResourceDatabaseServerService();
+		servicePool.subscriptionFilterService = new AzureResourceSubscriptionFilterService(cacheService);
 
-		let azureResourceTree = new AzureResourceTreeProvider();
+		const azureResourceTree = new AzureResourceTreeProvider();
 		this.extensionContext.subscriptions.push(this.apiWrapper.registerTreeDataProvider('azureResourceExplorer', azureResourceTree));
 
-		registerAzureResourceCommands(this.apiWrapper, azureResourceTree);
+		servicePool.accountService.onDidChangeAccounts((e: DidChangeAccountsParams) => { azureResourceTree.notifyNodeChanged(undefined); });
+
+		registerAzureResourceCommands(azureResourceTree);
+
+		return Promise.resolve(true);
+	}
+
+	public deactivate(): void {
 	}
 }

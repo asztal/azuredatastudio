@@ -5,56 +5,30 @@
 
 'use strict';
 
-import { TreeItem, TreeItemCollapsibleState } from 'vscode';
-import { NodeInfo } from 'sqlops';
-import { TreeNode } from '../../treeNodes';
+import { AzureResourceTreeNode } from './baseTreeNodes';
 
-import { AzureResourceItemType } from '../constants';
-
-export class AzureResourceMessageTreeNode extends TreeNode {
+export class AzureResourceMessageTreeNode extends AzureResourceTreeNode {
 	public constructor(
 		public readonly message: string,
-		parent: TreeNode
+		parent: AzureResourceTreeNode
 	) {
-		super();
+		super(undefined);
+
+		this.id = `message_${AzureResourceMessageTreeNode._messageNum++}`;
+		this.label = this.message;
+		this.isLeaf = true;
+		this.nodePath = this.id;
+		this.itemType = 'azure.resource.itemType.message';
+		this.iconPath = undefined;
+		this.callbacks = undefined;
+		this.parent = undefined;
 
 		this.parent = parent;
-		this._id = `message_${AzureResourceMessageTreeNode._messageNum++}`;
 	}
 
-	public static create(message: string, parent: TreeNode): AzureResourceMessageTreeNode {
+	public static create(message: string, parent: AzureResourceTreeNode): AzureResourceMessageTreeNode {
 		return new AzureResourceMessageTreeNode(message, parent);
 	}
-
-	public getChildren(): TreeNode[] | Promise<TreeNode[]> {
-		return [];
-	}
-
-	public getTreeItem(): TreeItem | Promise<TreeItem> {
-		let item = new TreeItem(this.message, TreeItemCollapsibleState.None);
-		item.contextValue = AzureResourceItemType.message;
-		return item;
-	}
-
-	public getNodeInfo(): NodeInfo {
-		return {
-			label: this.message,
-			isLeaf: true,
-			errorMessage: undefined,
-			metadata: undefined,
-			nodePath: this.generateNodePath(),
-			nodeStatus: undefined,
-			nodeType: AzureResourceItemType.message,
-			nodeSubType: undefined,
-			iconType: AzureResourceItemType.message
-		};
-	}
-
-	public get nodePathValue(): string {
-		return this._id;
-	}
-
-	private _id: string;
 
 	private static _messageNum: number = 0;
 }

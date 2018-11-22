@@ -5,10 +5,11 @@
 
 'use strict';
 
-import { ExtensionContext } from "vscode";
-import { ApiWrapper } from "../../apiWrapper";
+import { ExtensionContext } from 'vscode';
+import { IConnectionProfile, IConnectionCompletionOptions, connection } from 'sqlops';
+import { ApiWrapper } from '../../apiWrapper';
 
-import { IAzureResourceContextService } from "../interfaces";
+import { IAzureResourceContextService } from '../interfaces';
 
 export class AzureResourceContextService implements IAzureResourceContextService {
 	public constructor(
@@ -23,8 +24,16 @@ export class AzureResourceContextService implements IAzureResourceContextService
 		return this._context.asAbsolutePath(relativePath);
 	}
 
+	public registerCommand(commandId: string, callback: (...args: any[]) => any, thisArg?: any): void {
+		this._apiWrapper.registerCommand(commandId, callback);
+	}
+
 	public executeCommand(commandId: string, ...args: any[]): void {
 		this._apiWrapper.executeCommand(commandId, args);
+	}
+
+	public openConnectionDialog(providers?: string[], initialConnectionProfile?: IConnectionProfile, connectionCompletionOptions?: IConnectionCompletionOptions): Thenable<connection.Connection> {
+		return this._apiWrapper.openConnectionDialog(providers, initialConnectionProfile, connectionCompletionOptions);
 	}
 
 	public showErrorMessage(errorMessage: string): void {
