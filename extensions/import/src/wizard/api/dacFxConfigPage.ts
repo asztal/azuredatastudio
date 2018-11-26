@@ -80,7 +80,7 @@ export abstract class DacFxConfigPage extends BasePage {
 
 	protected async createDatabaseTextBox(): Promise<sqlops.FormComponent> {
 		this.databaseTextBox = this.view.modelBuilder.inputBox().withProperties({
-			required: true
+			// required: true
 		}).component();
 
 		this.databaseTextBox.onTextChanged(async () => {

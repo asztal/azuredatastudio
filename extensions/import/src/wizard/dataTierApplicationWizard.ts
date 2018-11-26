@@ -6,7 +6,8 @@
 import * as vscode from 'vscode';
 import * as nls from 'vscode-nls';
 import * as sqlops from 'sqlops';
-import { SelectOperationPage } from './pages/selectOperationpage';
+import { SelectOperationPage } from './pages/selectOperationPage';
+import { SelectPage } from './pages/selectPage';
 import { DeployConfigPage } from './pages/deployConfigPage';
 import { DacFxSummaryPage } from './pages/dacFxSummaryPage';
 import { ExportConfigPage } from './pages/exportConfigPage';
@@ -58,26 +59,38 @@ export class DataTierApplicationWizard {
 		}
 
 		this.wizard = sqlops.window.modelviewdialog.createWizard('Data-tier Application Wizard');
-		let selectOperationWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.selectOperationPageName', 'Select an Operation'));
-		let deployConfigWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.deployConfigPageName', 'Deploy Settings'));
-		let summaryWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.summaryPageName', 'Summary'));
-		let extractConfigWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.extractConfigPageName', 'Extract Settings'));
-		let importConfigWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.importConfigPageName', 'Import Settings'));
-		let exportConfigWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.exportConfigPageName', 'Export Settings'));
+		// let selectOperationWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.selectOperationPageName', 'Select an Operation'));
+		let selectWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.selectPageName', 'Select an Operation'));
 
-		this.pages.set('selectOperation', new Page(selectOperationWizardPage));
+		let deployConfigWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.deployConfigPageName', 'Publish Dacpac Settings'));
+		let summaryWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.summaryPageName', 'Summary'));
+		let extractConfigWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.extractConfigPageName', 'Export Dacpac Settings'));
+		let importConfigWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.importConfigPageName', 'Publish Bacpac Settings'));
+		let exportConfigWizardPage = sqlops.window.modelviewdialog.createWizardPage(localize('dacFx.exportConfigPageName', 'Export Bacpac Settings'));
+
+		// this.pages.set('selectOperation', new Page(selectOperationWizardPage));
+		this.pages.set('select', new Page(selectWizardPage));
 		this.pages.set('deployConfig', new Page(deployConfigWizardPage));
 		this.pages.set('extractConfig', new Page(extractConfigWizardPage));
 		this.pages.set('importConfig', new Page(importConfigWizardPage));
 		this.pages.set('exportConfig', new Page(exportConfigWizardPage));
 		this.pages.set('summary', new Page(summaryWizardPage));
 
-		selectOperationWizardPage.registerContent(async (view) => {
-			let selectOperationDacFxPage = new SelectOperationPage(this, selectOperationWizardPage, this.model, view);
-			this.pages.get('selectOperation').dacFxPage = selectOperationDacFxPage;
-			await selectOperationDacFxPage.start().then(() => {
-				selectOperationDacFxPage.setupNavigationValidator();
-				selectOperationDacFxPage.onPageEnter();
+		// selectOperationWizardPage.registerContent(async (view) => {
+		// 	let selectOperationDacFxPage = new SelectOperationPage(this, selectOperationWizardPage, this.model, view);
+		// 	this.pages.get('selectOperation').dacFxPage = selectOperationDacFxPage;
+		// 	await selectOperationDacFxPage.start().then(() => {
+		// 		selectOperationDacFxPage.setupNavigationValidator();
+		// 		selectOperationDacFxPage.onPageEnter();
+		// 	});
+		// });
+
+		selectWizardPage.registerContent(async (view) => {
+			let selectDacFxPage = new SelectPage(this, selectWizardPage, this.model, view);
+			this.pages.get('select').dacFxPage = selectDacFxPage;
+			await selectDacFxPage.start().then(() => {
+				selectDacFxPage.setupNavigationValidator();
+				selectDacFxPage.onPageEnter();
 			});
 		});
 
@@ -144,7 +157,7 @@ export class DataTierApplicationWizard {
 			}
 		});
 
-		this.wizard.pages = [selectOperationWizardPage, deployConfigWizardPage, summaryWizardPage];
+		this.wizard.pages = [selectWizardPage, deployConfigWizardPage, summaryWizardPage];
 		this.wizard.generateScriptButton.hidden = true;
 		this.wizard.doneButton.onClick(async () => await this.executeOperation());
 
@@ -205,7 +218,7 @@ export class DataTierApplicationWizard {
 		let service = await DataTierApplicationWizard.getService();
 		let ownerUri = await sqlops.connection.getUriForConnection(this.model.server.connectionId);
 
-		let result = await service.deployDacpac(this.model.filePath, this.model.database, ownerUri, sqlops.TaskExecutionMode.execute);
+		let result = await service.deployDacpac(this.model.filePath, this.model.database, this.model.upgradeExisting, ownerUri, sqlops.TaskExecutionMode.execute);
 		if (!result || !result.success) {
 			vscode.window.showErrorMessage(
 				localize('alertData.deployErrorMessage', "Deploy failed '{0}'", result.errorMessage ? result.errorMessage : 'Unknown'));
