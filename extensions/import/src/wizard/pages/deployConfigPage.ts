@@ -113,14 +113,14 @@ export class DeployConfigPage extends DacFxConfigPage {
 			}).component();
 
 		this.upgradeCheckbox.onChanged(() => {
-			this.model.upgradeExisting = this.upgradeCheckbox.checked? true : false;
+			this.model.upgradeExisting = this.upgradeCheckbox.checked ? true : false;
 
 			if (this.model.upgradeExisting) {
 				this.formBuilder.removeFormItem(this.databaseComponent);
-				this.formBuilder.addFormItem(this.databaseDropdownComponent, {horizontal: true, componentWidth: 400});
+				this.formBuilder.addFormItem(this.databaseDropdownComponent, { horizontal: true, componentWidth: 400 });
 			} else {
 				this.formBuilder.removeFormItem(this.databaseDropdownComponent);
-				this.formBuilder.addFormItem(this.databaseComponent, {horizontal: true, componentWidth: 400});
+				this.formBuilder.addFormItem(this.databaseComponent, { horizontal: true, componentWidth: 400 });
 			}
 		});
 

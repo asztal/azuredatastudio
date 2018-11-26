@@ -76,7 +76,7 @@ export class SelectPage extends BasePage {
 			.withProperties({
 				value: localize('dacFx.fileTypeText', 'File Type'),
 			}).component();
-5
+		5
 		return {
 			component: this.fileTypeText,
 			title: ''
@@ -133,10 +133,10 @@ export class SelectPage extends BasePage {
 			if (this.dacpacRadioButton.checked) {
 				page = this.instance.pages.get('extractConfig');
 				this.instance.setDoneButton(Operation.extract);
-			 } else {
+			} else {
 				page = this.instance.pages.get('exportConfig');
 				this.instance.setDoneButton(Operation.export);
-			 }
+			}
 			this.instance.wizard.addPage(page.wizardPage, 1);
 		});
 
@@ -162,7 +162,7 @@ export class SelectPage extends BasePage {
 			// add the extract page
 			console.log('pub:' + this.publishRadioButton.checked + ' ex:' + this.exportRadioButton.checked + ' dac:' + this.dacpacRadioButton.checked + ' bac:' + this.bacpacRadioButton.checked);
 			let page;
-			if (this.publishRadioButton.checked){
+			if (this.publishRadioButton.checked) {
 				page = this.instance.pages.get('deployConfig');
 				this.instance.setDoneButton(Operation.deploy);
 			} else {
