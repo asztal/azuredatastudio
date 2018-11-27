@@ -6,6 +6,7 @@
 
 import { SqlOpsDataClient, ClientOptions, SqlOpsFeature } from 'dataprotocol-client';
 import * as path from 'path';
+import * as keytar from 'keytar';
 import { IConfig, ServerProvider } from 'service-downloader';
 import { ServerOptions, RPCMessageType, ClientCapabilities, ServerCapabilities, TransportKind } from 'vscode-languageclient';
 import { Disposable } from 'vscode';
@@ -43,15 +44,21 @@ class CredentialsFeature extends SqlOpsFeature<any> {
 		const client = this._client;
 
 		let readCredential = (credentialId: string): Thenable<sqlops.Credential> => {
-			return client.sendRequest(Contracts.ReadCredentialRequest.type, { credentialId });
+			return keytar.getPassword(Constants.credentialNamespace, credentialId)
+				.then(password => ({ credentialId, password }))
+				.catch(() => client.sendRequest(Contracts.ReadCredentialRequest.type, { credentialId }));
 		};
 
 		let saveCredential = (credentialId: string, password: string): Thenable<boolean> => {
-			return client.sendRequest(Contracts.SaveCredentialRequest.type, { credentialId, password });
+			return keytar.setPassword(Constants.credentialNamespace, credentialId, password)
+				.then(() => true)
+				.catch(() => client.sendRequest(Contracts.SaveCredentialRequest.type, { credentialId, password }));
 		};
 
 		let deleteCredential = (credentialId: string): Thenable<boolean> => {
-			return client.sendRequest(Contracts.DeleteCredentialRequest.type, { credentialId });
+			return keytar.deletePassword(Constants.credentialNamespace, credentialId)
+				.then(() => true)
+				.catch(() => client.sendRequest(Contracts.DeleteCredentialRequest.type, { credentialId }));
 		};
 
 		return sqlops.credentials.registerProvider({

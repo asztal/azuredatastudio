@@ -4,5 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 'use strict';
 
+export const credentialNamespace = 'azuredatastudio';
 export const serviceName = 'SerilizationProvider';
 export const providerId = 'serilizationProvider';
